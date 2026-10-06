@@ -1,5 +1,6 @@
 import 'package:coffee_shop_ui/screens/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,8 +15,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Coffee Shop UI',
       theme: ThemeData(
-
+            textTheme: GoogleFonts.poppinsTextTheme(),
       ),
+      debugShowCheckedModeBanner: false,
       home: const HomeScreen(),
     );
   }
