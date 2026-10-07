@@ -28,6 +28,10 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/bakery/
+    - assets/images/drinks/
+    - assets/images/hot coffee/
+    - assets/images/hot teas/
   # fonts:
   #   - family: Schyler
   #     fonts:

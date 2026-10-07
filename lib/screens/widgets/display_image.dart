@@ -11,13 +11,13 @@ class DisplayImage extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constrain) {
         return SizedBox(
-          height: constrain.maxHeight * 1.25,
+          height: constrain.maxWidth * 1.25,
           width: constrain.maxWidth,
           child: Stack(
             alignment: AlignmentDirectional.bottomCenter,
             children: [
               Container(
-                width: constrain.maxHeight,
+                width: constrain.maxWidth,
                 height: constrain.maxWidth * 0.9,
                 decoration: BoxDecoration(color: thirdColor, shape: .circle),
               ),

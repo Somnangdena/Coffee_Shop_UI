@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:coffee_shop_ui/models/product.dart';
+import 'package:coffee_shop_ui/screens/detail_screen.dart';
 import 'package:coffee_shop_ui/screens/widgets/background.dart';
 import 'package:coffee_shop_ui/screens/widgets/category_item.dart';
 import 'package:coffee_shop_ui/screens/widgets/display_image.dart';
@@ -20,6 +21,24 @@ class _HomeScreenState extends State<HomeScreen> {
   PageController? controller;
   double viewPoint = 0.5;
   double? pageOffSet = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = PageController(initialPage: 1, viewportFraction: viewPoint)
+      ..addListener(() {
+        setState(() {
+          pageOffSet == controller!.page;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller!.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Product> dataProducts = products
@@ -81,7 +100,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       bottomPadding = index > max ? index - decrease++ : index;
                     }
                     return GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        setState(() {
+                          currentCategory = index;
+                          dataProducts = products
+                              .where(
+                                (element) =>
+                                    element.category ==
+                                    categories[currentCategory],
+                              )
+                              .toList();
+                        });
+                      },
                       child: Padding(
                         padding: .only(
                           top: 10,
@@ -109,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned(
             bottom: 0,
             child: Stack(
+              alignment: AlignmentDirectional.bottomCenter,
               children: [
                 ClipPath(
                   clipper: Clip(),
@@ -117,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: MediaQuery.of(context).size.height * 0.58,
                     width: MediaQuery.of(context).size.width,
                     child: PageView.builder(
+                      controller: controller,
                       onPageChanged: (value) {
                         setState(() {
                           currentProduct = value % dataProducts.length;
@@ -130,14 +162,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         double angle = 0.0;
                         final items = dataProducts[index % dataProducts.length];
                         return GestureDetector(
-                          onTap: () {},
-                          child: Padding(
-                            padding: .only(top: 200 - (scale / 1.6 * 170)),
-                            child: Transform.rotate(
-                              angle: angle * pi,
-                              child: Stack(
-                                alignment: .topCenter,
-                                children: [DisplayImage(product: items)],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DetailScreen(product: items),
+                              ),
+                            );
+                          },
+                          child: Hero(
+                            tag: items.name,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                top: 200 - (scale / 1.6 * 170),
+                              ),
+                              child: Transform.rotate(
+                                angle: angle * pi,
+                                child: Stack(
+                                  alignment: AlignmentDirectional.topCenter,
+                                  children: [DisplayImage(product: items)],
+                                ),
                               ),
                             ),
                           ),
@@ -145,6 +190,48 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
+                ),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 2,
+                      child: Column(
+                        children: [
+                          Text(
+                            dataProducts[currentProduct % dataProducts.length]
+                                .name,
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: .bold,
+                              fontSize: 20,
+                              height: 1.5,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            '\$${dataProducts[currentProduct % dataProducts.length].price}0',
+                            maxLines: 2,
+                            textAlign: .center,
+                            style: const TextStyle(
+                              fontWeight: .bold,
+                              fontSize: 17,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: List.generate(
+                        dataProducts.length,
+                        (index) => indicator(index),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
                 ),
               ],
             ),
@@ -154,37 +241,61 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  AppBar myAppBar() {
-    return AppBar(
-      backgroundColor: Colors.white,
-      title: Row(
-        children: [
-          Image.asset(
-            "assets/images/coffee-cup.png",
-            height: 30,
-            color: Colors.amber,
-          ),
-          SizedBox(width: 5),
-          Column(
-            children: [
-              Text("Qahwa", style: TextStyle(fontWeight: .bold, fontSize: 16)),
-              Text("Space", style: TextStyle(fontSize: 15)),
-            ],
-          ),
-        ],
-      ),
-      actions: [
-        Center(
-          child: Badge(
-            backgroundColor: firstColor,
-            smallSize: 8,
-            child: Icon(Icons.shopping_cart, color: Colors.amber),
-          ),
+  AnimatedContainer indicator(int index) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          width: 3,
+          color: index == currentProduct
+              ? Colors.amberAccent
+              : Colors.transparent,
         ),
-        SizedBox(width: 15),
-      ],
+      ),
+      padding: const EdgeInsets.all(10),
+      child: Container(
+        width: 6,
+        height: 6,
+        decoration: BoxDecoration(
+          color: index == currentProduct ? Colors.white : Colors.white60,
+          shape: BoxShape.circle,
+        ),
+      ),
     );
   }
+}
+
+AppBar myAppBar() {
+  return AppBar(
+    backgroundColor: Colors.white,
+    title: Row(
+      children: [
+        Image.asset(
+          "assets/images/coffee-cup.png",
+          height: 30,
+          color: Colors.amber,
+        ),
+        SizedBox(width: 5),
+        Column(
+          children: [
+            Text("Qahwa", style: TextStyle(fontWeight: .bold, fontSize: 16)),
+            Text("Space", style: TextStyle(fontSize: 15)),
+          ],
+        ),
+      ],
+    ),
+    actions: [
+      Center(
+        child: Badge(
+          backgroundColor: firstColor,
+          smallSize: 8,
+          child: Icon(Icons.shopping_cart, color: Colors.amber),
+        ),
+      ),
+      SizedBox(width: 15),
+    ],
+  );
 }
 
 class Clip extends CustomClipper<Path> {
