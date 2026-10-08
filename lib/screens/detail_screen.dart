@@ -31,7 +31,7 @@ class _DetailScreenState extends State<DetailScreen> {
             child: Column(
               children: [
                 Hero(
-                  tag: widget.product.image,
+                  tag: widget.product.name,
                   child: SizedBox(
                     width: size.width * 0.81,
                     height: size.height * 0.5,
