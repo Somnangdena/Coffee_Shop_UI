@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     controller = PageController(initialPage: 1, viewportFraction: viewPoint)
       ..addListener(() {
         setState(() {
-          pageOffSet == controller!.page;
+          pageOffSet = controller!.page;
         });
       });
   }
